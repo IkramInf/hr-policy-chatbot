@@ -1,4 +1,6 @@
 
+import html
+
 import streamlit as st
 
 from frontend.utils.date_utils import get_formatted_date
@@ -29,19 +31,33 @@ def render_sidebar() -> str | None:
     selected_question: str | None = None
 
     with st.sidebar:
-        st.markdown("## Your HR Policy Assistant")
-        st.caption("Clear answers from your company leave policy.")
+        st.markdown(
+            """
+            <div class="brand">
+              <div class="brand-mark">💬</div>
+              <div>
+                <div class="brand-name">HR Policy Assistant</div>
+                <div class="brand-tag">Clear answers from your leave policy</div>
+              </div>
+            </div>
+            """.replace("\n", ""),
+            unsafe_allow_html=True,
+        )
 
-        st.divider()
+        st.write("")
 
-        if st.button("＋ New Chat", use_container_width=True):
+        if st.button(
+            "New chat",
+            icon=":material/add:",
+            type="primary",
+            use_container_width=True,
+            key="new_chat",
+        ):
             st.session_state.messages = []
             st.session_state.pending_question = None
             st.rerun()
 
-        with st.expander("Frequently Asked Questions", expanded=True):
-            st.caption("Select a question to get started.")
-
+        with st.expander("Frequently asked questions", expanded=True):
             for index, question in enumerate(SUGGESTED_QUESTIONS):
                 if st.button(
                     question,
@@ -51,25 +67,33 @@ def render_sidebar() -> str | None:
                     selected_question = question
 
         with st.expander("Contact HR"):
-            st.write(
-                "For questions the policy does not answer, "
-                "please contact your HR team."
+            st.markdown(
+                '<div class="contact-card">'
+                "Your question isn't covered? Our HR team can help.<br>"
+                f'<a href="mailto:{html.escape(HR_EMAIL)}">'
+                f"{html.escape(HR_EMAIL)}</a>"
+                "</div>",
+                unsafe_allow_html=True,
             )
-            st.markdown(f"[Email HR](mailto:{HR_EMAIL})")
 
-        with st.expander("Chat Tips"):
+        with st.expander("Tips for better answers"):
             st.markdown(
                 """
                 - Ask one question at a time.
-                - Mention the type of leave you mean.
+                - Name the type of leave you mean.
                 - Check the cited policy section.
                 - Contact HR when the policy is unclear.
                 """
             )
 
         st.divider()
-        st.caption(f"Policy version: {POLICY_VERSION}")
-        st.caption(f"Today: {get_formatted_date()}")
-        st.caption("Answers are based on indexed policy documents.")
+        st.markdown(
+            '<div class="side-meta">'
+            f"Policy version {html.escape(POLICY_VERSION)}<br>"
+            f"{html.escape(get_formatted_date())}<br>"
+            "Answers are based on indexed policy documents."
+            "</div>",
+            unsafe_allow_html=True,
+        )
 
     return selected_question

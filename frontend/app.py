@@ -1,4 +1,7 @@
 
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 import streamlit as st
 
 from frontend.components.sidebar import render_sidebar
@@ -8,13 +11,15 @@ from frontend.services.api_client import (
     APIClientError,
     send_chat_message,
 )
+from frontend.styles import inject_styles
+from frontend.utils.date_utils import DEFAULT_TIMEZONE
 
 
 st.set_page_config(
     page_title="HR Policy Assistant",
     page_icon="💬",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 
@@ -24,18 +29,27 @@ def initialize_session() -> None:
     st.session_state.setdefault("pending_question", None)
 
 
+def _now_label() -> str:
+    """Return the current time, e.g. 9:05 AM, for message timestamps."""
+    return (
+        datetime.now(ZoneInfo(DEFAULT_TIMEZONE))
+        .strftime("%I:%M %p")
+        .lstrip("0")
+    )
+
+
 def process_question(question: str) -> None:
     """Add a question, call the API, and store the response."""
     st.session_state.messages.append(
         {
             "role": "user",
             "content": question,
+            "time": _now_label(),
         }
     )
 
     try:
-        with st.spinner("Checking the leave policy..."):
-            result = send_chat_message(question)
+        result = send_chat_message(question)
 
         st.session_state.messages.append(
             {
@@ -43,6 +57,7 @@ def process_question(question: str) -> None:
                 "content": result["answer"],
                 "sources": result.get("sources", []),
                 "blocked": result.get("blocked", False),
+                "time": _now_label(),
             }
         )
 
@@ -50,14 +65,12 @@ def process_question(question: str) -> None:
         st.session_state.messages.append(
             {
                 "role": "assistant",
-                "content": (
-                    f"**Unable to get an answer**\n\n"
-                    f"{exc}\n\n"
-                    "Please try again. If the problem continues, "
-                    "contact HR."
-                ),
+                "content": f"{exc} Please try again. If the problem "
+                "continues, contact HR.",
                 "sources": [],
                 "blocked": False,
+                "error": True,
+                "time": _now_label(),
             }
         )
 
@@ -68,26 +81,28 @@ def process_question(question: str) -> None:
                 "content": str(exc),
                 "sources": [],
                 "blocked": False,
+                "error": True,
+                "time": _now_label(),
             }
         )
 
 
 def main() -> None:
     initialize_session()
+    inject_styles()
 
     selected_question = render_sidebar()
-
-    if selected_question:
-        st.session_state.pending_question = selected_question
-
-    render_chat_view()
-
     typed_question = render_message_composer()
 
     question_to_process = (
         typed_question
+        or selected_question
         or st.session_state.pending_question
     )
+
+    # Show history plus the new question and a typing indicator
+    # while the backend is working.
+    render_chat_view(pending_question=question_to_process)
 
     if question_to_process:
         st.session_state.pending_question = None

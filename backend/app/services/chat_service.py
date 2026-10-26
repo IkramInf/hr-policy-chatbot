@@ -1,3 +1,4 @@
+# backend/app/services/chat_service.py
 
 from dataclasses import dataclass, field
 import logging
@@ -115,6 +116,9 @@ def answer_question(question: str) -> ChatResult:
 
     if not policy_context.strip() or not sources:
         return ChatResult(answer=FALLBACK_ANSWER)
+
+    logger.info("Question sent to LLM: %s", question)
+    logger.info("Policy context sent to LLM:\n%s", policy_context)
 
     # 5. Generate an evidence-grounded answer.
     try:

@@ -1,11 +1,13 @@
+# backend/app/services/retrieval_service.py
+
+import logging
 
 from dataclasses import dataclass
-
 from langchain_core.documents import Document
-
 from backend.app.core.config import get_settings
 from backend.app.infrastructure.vector_store import search_policy
 
+logger = logging.getLogger(__name__)
 
 @dataclass
 class RetrievedChunk:
@@ -15,14 +17,12 @@ class RetrievedChunk:
     score: float
 
 
+
 def retrieve_policy_chunks(
     question: str,
     top_k: int | None = None,
 ) -> list[RetrievedChunk]:
-    """
-    Retrieve policy passages and discard matches below the configured
-    similarity threshold.
-    """
+    """Retrieve policy passages and log their threshold decisions."""
     if not question or not question.strip():
         raise ValueError("Question cannot be empty.")
 
@@ -33,15 +33,25 @@ def retrieve_policy_chunks(
 
     for document, score in results:
         similarity = float(score)
+        passed = similarity >= settings.retrieval_score_threshold
 
-        if similarity < settings.retrieval_score_threshold:
+        metadata = document.metadata
+        logger.info(
+            "Retrieval | score=%.4f | threshold=%.4f | passed=%s "
+            "| section=%s | heading=%s | content=%.180s",
+            similarity,
+            settings.retrieval_score_threshold,
+            passed,
+            metadata.get("section_number", ""),
+            metadata.get("section_heading", ""),
+            document.page_content.replace("\n", " "),
+        )
+
+        if not passed:
             continue
 
         retrieved.append(
-            RetrievedChunk(
-                document=document,
-                score=similarity,
-            )
+            RetrievedChunk(document=document, score=similarity)
         )
 
     return retrieved

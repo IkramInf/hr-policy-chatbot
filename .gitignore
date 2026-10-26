@@ -8,3 +8,4 @@ venv/
 .venv/
 backend/venv/
 .cache/
+hr_policy_chatbot.egg-info/

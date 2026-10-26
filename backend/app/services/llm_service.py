@@ -1,3 +1,4 @@
+# backend/app/services/llm_service.py
 
 from functools import lru_cache
 
@@ -47,6 +48,9 @@ def generate_answer(question: str, policy_context: str) -> str:
 
     response = get_llm().invoke(messages)
     answer = response.content
+
+    print("QUESTION:", question)
+    print("RAW LLM RESPONSE:", repr(answer))
 
     if isinstance(answer, str):
         cleaned_answer = answer.strip()
