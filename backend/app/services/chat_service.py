@@ -2,8 +2,9 @@
 
 from dataclasses import dataclass, field
 import logging
+import re
 
-from backend.app.core.prompts import SYSTEM_PROMPT
+from backend.app.core.prompts import FALLBACK_ANSWER
 from backend.app.services.llm_service import generate_answer
 from backend.app.services.privacy_service import (
     PRIVACY_REFUSAL,
@@ -16,8 +17,6 @@ from backend.app.services.retrieval_service import (
 )
 
 logger = logging.getLogger(__name__)
-
-FALLBACK_ANSWER = "I don't know, please contact HR."
 
 
 @dataclass
@@ -82,6 +81,27 @@ def _build_sources(chunks: list[RetrievedChunk]) -> list[PolicySource]:
     return sources
 
 
+def _cited_sources(
+    answer: str,
+    sources: list[PolicySource],
+) -> list[PolicySource]:
+    """Keep only sources the answer cites; fall back to all retrieved."""
+    cited = [
+        source
+        for source in sources
+        if (
+            source.section_number
+            and re.search(
+                rf"Section\s+{re.escape(source.section_number)}(?!\d)",
+                answer,
+            )
+        )
+        or source.section_heading.lower() in answer.lower()
+    ]
+
+    return cited or sources
+
+
 def answer_question(question: str) -> ChatResult:
     """
     Process a question using privacy checks, retrieval, and Groq.
@@ -117,8 +137,7 @@ def answer_question(question: str) -> ChatResult:
     if not policy_context.strip() or not sources:
         return ChatResult(answer=FALLBACK_ANSWER)
 
-    logger.info("Question sent to LLM: %s", question)
-    logger.info("Policy context sent to LLM:\n%s", policy_context)
+    logger.debug("Policy context sent to LLM:\n%s", policy_context)
 
     # 5. Generate an evidence-grounded answer.
     try:
@@ -130,13 +149,18 @@ def answer_question(question: str) -> ChatResult:
         logger.exception("Policy answer generation failed.")
         raise
 
-    # 6. Keep the required fallback exact if the model uses it.
-    if answer.strip() == FALLBACK_ANSWER:
+    # 6. Keep the required fallback exact, even if the model adds text
+    #    or quotes around it.
+    normalized = answer.strip().strip("\"'“”").strip()
+
+    if normalized.lower().startswith(FALLBACK_ANSWER.lower()):
         return ChatResult(answer=FALLBACK_ANSWER)
 
-    # Sources identify retrieved passages; they do not independently
-    # prove that every claim in the generated answer is correct.
+    # 7. A refusal produced by the LLM is still a privacy block.
+    if normalized == PRIVACY_REFUSAL:
+        return ChatResult(answer=PRIVACY_REFUSAL, blocked=True)
+
     return ChatResult(
         answer=answer,
-        sources=sources,
+        sources=_cited_sources(answer, sources),
     )

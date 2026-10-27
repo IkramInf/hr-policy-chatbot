@@ -1,5 +1,6 @@
 # backend/app/services/llm_service.py
 
+import logging
 from functools import lru_cache
 
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -7,6 +8,8 @@ from langchain_groq import ChatGroq
 
 from backend.app.core.config import get_settings
 from backend.app.core.prompts import SYSTEM_PROMPT, build_user_prompt
+
+logger = logging.getLogger(__name__)
 
 
 @lru_cache(maxsize=1)
@@ -19,7 +22,7 @@ def get_llm() -> ChatGroq:
         api_key=settings.groq_api_key.get_secret_value(),
         temperature=0,
         timeout=settings.request_timeout_seconds,
-        max_retries=2,
+        max_retries=1,
     )
 
 
@@ -49,8 +52,7 @@ def generate_answer(question: str, policy_context: str) -> str:
     response = get_llm().invoke(messages)
     answer = response.content
 
-    print("QUESTION:", question)
-    print("RAW LLM RESPONSE:", repr(answer))
+    logger.debug("Raw LLM response: %r", answer)
 
     if isinstance(answer, str):
         cleaned_answer = answer.strip()

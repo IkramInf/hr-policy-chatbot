@@ -9,7 +9,7 @@ from uuid import NAMESPACE_URL, uuid5
 
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from pypdf import PdfReader
+import pdfplumber
 from qdrant_client import models
 
 from backend.app.core.config import get_settings
@@ -35,27 +35,32 @@ HEADING_PATTERN = re.compile(
 )
 
 
+_PAGE_NOISE = re.compile(
+    r"^(Page \d+ of \d+|.*Leave Policy \(Sample\))$", re.IGNORECASE
+)
+
+
 def extract_pdf_text(pdf_path: Path) -> str:
-    """Extract text from a text-based PDF."""
+    """Extract text in reading order (tables stay inside their section)."""
     if not pdf_path.is_file():
         raise FileNotFoundError(f"Policy PDF not found: {pdf_path}")
 
-    reader = PdfReader(str(pdf_path))
-
-    if reader.is_encrypted:
-        raise ValueError("The policy PDF is encrypted.")
-
     pages: list[str] = []
 
-    for page_number, page in enumerate(reader.pages, start=1):
-        text = page.extract_text() or ""
+    with pdfplumber.open(str(pdf_path)) as pdf:
+        for page_number, page in enumerate(pdf.pages, start=1):
+            text = page.extract_text() or ""
+            lines = [
+                line for line in text.splitlines()
+                if not _PAGE_NOISE.match(line.strip())
+            ]
 
-        if text.strip():
-            pages.append(f"\n{text.strip()}\n")
-        else:
-            logger.warning(
-                "Page %d contains no extractable text.", page_number
-            )
+            if any(line.strip() for line in lines):
+                pages.append("\n".join(lines))
+            else:
+                logger.warning(
+                    "Page %d contains no extractable text.", page_number
+                )
 
     extracted = "\n".join(pages).strip()
 
@@ -66,6 +71,12 @@ def extract_pdf_text(pdf_path: Path) -> str:
         )
 
     return extracted
+
+
+def _is_clause(heading: str) -> bool:
+    """A long or sentence-like line (e.g. '5.1 The weekly holidays are...')
+    is a numbered clause, not a heading: keep it as section content."""
+    return len(heading.split()) > 8 or heading.endswith((".", ","))
 
 
 def split_into_sections(text: str) -> list[dict[str, str]]:
@@ -83,7 +94,7 @@ def split_into_sections(text: str) -> list[dict[str, str]]:
     for line in text.splitlines():
         match = HEADING_PATTERN.match(line.strip())
 
-        if match:
+        if match and not _is_clause(match.group("heading")):
             content = "\n".join(current_lines).strip()
 
             if content:

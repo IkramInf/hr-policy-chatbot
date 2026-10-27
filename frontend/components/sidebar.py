@@ -31,24 +31,18 @@ def render_sidebar() -> str | None:
     selected_question: str | None = None
 
     with st.sidebar:
+        # Header (sticky at the top of the sidebar)
         st.markdown(
-            """
-            <div class="brand">
-              <div class="brand-mark">💬</div>
-              <div>
-                <div class="brand-name">HR Policy Assistant</div>
-                <div class="brand-tag">Clear answers from your leave policy</div>
-              </div>
-            </div>
-            """.replace("\n", ""),
+            '<div class="brand"><div class="brand-mark">💬</div><div>'
+            '<div class="brand-name">HR Policy Assistant</div>'
+            '<div class="brand-tag">Clear answers from your leave policy</div>'
+            "</div></div>",
             unsafe_allow_html=True,
         )
 
-        st.write("")
-
         if st.button(
             "New chat",
-            icon=":material/add:",
+            icon=":material/add_comment:",
             type="primary",
             use_container_width=True,
             key="new_chat",
@@ -57,41 +51,53 @@ def render_sidebar() -> str | None:
             st.session_state.pending_question = None
             st.rerun()
 
-        with st.expander("Frequently asked questions", expanded=True):
+        with st.expander(
+            "Common questions",
+            expanded=True,
+            icon=":material/help:",
+        ):
             for index, question in enumerate(SUGGESTED_QUESTIONS):
                 if st.button(
                     question,
                     key=f"faq_{index}",
+                    icon=":material/chat_bubble_outline:",
                     use_container_width=True,
                 ):
                     selected_question = question
 
-        with st.expander("Contact HR"):
+        with st.expander("Tips for better answers", icon=":material/lightbulb:"):
+            tips = [
+                ("Ask one thing at a time", "Short, specific questions work best."),
+                ("Name the leave type", "For example annual, sick or casual leave."),
+                ("Check the cited section", "Every answer points to its policy section."),
+                ("Still unsure?", "Contact HR for anything the policy does not cover."),
+            ]
             st.markdown(
-                '<div class="contact-card">'
-                "Your question isn't covered? Our HR team can help.<br>"
-                f'<a href="mailto:{html.escape(HR_EMAIL)}">'
-                f"{html.escape(HR_EMAIL)}</a>"
-                "</div>",
+                '<ul class="tips">'
+                + "".join(
+                    f'<li><span class="n">{i}</span><span><b>{html.escape(t)}</b>'
+                    f"{html.escape(d)}</span></li>"
+                    for i, (t, d) in enumerate(tips, start=1)
+                )
+                + "</ul>",
                 unsafe_allow_html=True,
             )
 
-        with st.expander("Tips for better answers"):
+        with st.expander("Contact HR", icon=":material/mail:"):
             st.markdown(
-                """
-                - Ask one question at a time.
-                - Name the type of leave you mean.
-                - Check the cited policy section.
-                - Contact HR when the policy is unclear.
-                """
+                '<div class="contact-card">Your question isn\'t covered? '
+                "Our HR team can help.<br>"
+                f'<a href="mailto:{html.escape(HR_EMAIL)}">Email HR</a></div>',
+                unsafe_allow_html=True,
             )
 
-        st.divider()
+        # Footer (sticky at the bottom of the sidebar)
         st.markdown(
-            '<div class="side-meta">'
-            f"Policy version {html.escape(POLICY_VERSION)}<br>"
-            f"{html.escape(get_formatted_date())}<br>"
-            "Answers are based on indexed policy documents."
+            '<div class="sidebar-footer">'
+            '<div class="row">'
+            f'<span class="pill">Policy v{html.escape(POLICY_VERSION)}</span>'
+            f"<span>{html.escape(get_formatted_date())}</span></div>"
+            '<div class="note">Answers are based on the indexed policy document.</div>'
             "</div>",
             unsafe_allow_html=True,
         )

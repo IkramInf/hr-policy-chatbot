@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     # Groq
     groq_api_key: SecretStr
-    groq_model: str = "llama-3.3-70b-versatile"
+    groq_model: str = "openai/gpt-oss-20b"
 
     # Qdrant Cloud
     qdrant_url: str
@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     request_timeout_seconds: int = Field(default=30, ge=5, le=120)
 
     # CORS: comma-separated origins in the environment variable
-    cors_origins: str = "http://localhost:8501"
+    cors_origins: str = "https://hr-guide.streamlit.app,http://localhost:8501"
 
     @property
     def allowed_origins(self) -> list[str]:

@@ -48,62 +48,127 @@ section[data-testid="stSidebar"] {
   background: #FFFFFF;
   border-right: 1px solid var(--line);
 }
-section[data-testid="stSidebar"] .block-container,
-section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
-  padding-top: 1.5rem;
+/* collapse arrow: a clear, tappable round button in the top-right corner */
+[data-testid="stSidebarHeader"] {
+  position: absolute; top: .9rem; right: .75rem; z-index: 30;
+  padding: 0; height: auto; background: transparent;
 }
-.brand { display: flex; align-items: center; gap: .75rem; margin-bottom: .25rem; }
+[data-testid="stSidebarCollapseButton"] button,
+[data-testid="stExpandSidebarButton"],
+[data-testid="stExpandSidebarButton"] button,
+[data-testid="collapsedControl"] button {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--pine-tint); color: var(--pine-deep);
+  border: 1px solid var(--line);
+  transition: background .15s, color .15s;
+}
+[data-testid="stSidebarCollapseButton"] button:hover,
+[data-testid="stExpandSidebarButton"]:hover,
+[data-testid="stExpandSidebarButton"] button:hover,
+[data-testid="collapsedControl"] button:hover {
+  background: var(--pine); color: #fff;
+}
+[data-testid="stSidebarCollapseButton"] button svg,
+[data-testid="stExpandSidebarButton"] svg { color: inherit; }
+
+[data-testid="stSidebarUserContent"] { padding: 0 !important; }
+[data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] {
+  min-height: 100vh; gap: 0;
+  padding: 0 1rem;
+}
+[data-testid="stSidebarUserContent"] > div > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] { margin-bottom: .6rem; }
+section[data-testid="stSidebar"] [data-testid="stExpanderDetails"] [data-testid="stVerticalBlock"] { gap: .1rem; }
+section[data-testid="stSidebar"] [data-testid="stExpanderDetails"] [data-testid="stElementContainer"] { margin: 0; }
+
+/* sticky header (brand) and footer (version, date) */
+[data-testid="stElementContainer"]:has(.brand) {
+  position: sticky; top: 0; z-index: 20; background: #fff;
+  margin: 0 -1rem .9rem; width: calc(100% + 2rem) !important; max-width: none !important; box-sizing: border-box;
+  padding: 1.1rem 3.6rem 1rem 1rem;
+  border-bottom: 1px solid var(--line);
+}
+[data-testid="stElementContainer"]:has(.sidebar-footer) {
+  position: sticky; bottom: 0; z-index: 20; background: #fff;
+  margin: auto -1rem 0; width: calc(100% + 2rem) !important; max-width: none !important; box-sizing: border-box;
+  padding: .9rem 1rem 1rem;
+  border-top: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: .75rem; }
 .brand-mark {
-  width: 40px; height: 40px; border-radius: 12px; flex: none;
+  width: 42px; height: 42px; border-radius: 12px; flex: none;
   display: grid; place-items: center; color: #fff; font-size: 20px;
   background: linear-gradient(135deg, var(--pine) 0%, var(--pine-deep) 100%);
+  box-shadow: 0 4px 10px rgba(11, 79, 74, .25);
 }
-.brand-name { font-weight: 700; font-size: 1.02rem; color: var(--pine-deep); line-height: 1.2; }
-.brand-tag { font-size: .8rem; color: var(--muted); line-height: 1.3; }
+.brand-name { font-weight: 700; font-size: .95rem; white-space: nowrap; color: var(--pine-deep); line-height: 1.2; }
+.brand-tag { font-size: .74rem; color: var(--muted); line-height: 1.35; margin-top: 2px; }
 
+.side-label {
+  font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted); margin: .6rem 0 0;
+}
+.sidebar-footer { display: flex; flex-direction: column; gap: .3rem; font-size: .78rem; color: var(--muted); }
+.sidebar-footer .row { display: flex; justify-content: space-between; align-items: center; }
+.sidebar-footer .pill {
+  background: var(--pine-tint); color: var(--pine-deep);
+  font-weight: 600; border-radius: 999px; padding: .1rem .6rem;
+}
+.sidebar-footer .note { font-size: .72rem; line-height: 1.4; }
+
+/* new chat + FAQ buttons */
 section[data-testid="stSidebar"] .stButton > button {
-  justify-content: flex-start;
-  text-align: left;
-  border: 1px solid var(--line);
-  background: #FFFFFF;
-  color: var(--ink);
-  font-weight: 500;
-  font-size: .86rem;
-  border-radius: 10px;
-  padding: .5rem .75rem;
-  transition: background .15s, border-color .15s;
+  justify-content: flex-start; text-align: left;
+  border: 1px solid transparent; background: transparent;
+  color: var(--ink); font-weight: 500; font-size: .85rem;
+  border-radius: 10px; padding: .45rem .6rem; min-height: 0;
+  transition: background .15s, border-color .15s, padding .15s;
 }
 section[data-testid="stSidebar"] .stButton > button:hover {
-  background: var(--pine-tint);
-  border-color: var(--pine);
-  color: var(--pine-deep);
+  background: var(--pine-tint); color: var(--pine-deep);
+  border-color: transparent; padding-left: .8rem;
+}
+section[data-testid="stSidebar"] .stButton > button [data-testid="stIconMaterial"] {
+  color: var(--pine); font-size: 1.1rem;
 }
 section[data-testid="stSidebar"] .stButton > button[kind="primary"] {
-  background: var(--pine);
-  border-color: var(--pine);
-  color: #fff;
-  font-weight: 600;
-  justify-content: center;
+  background: var(--pine); border-color: var(--pine); color: #fff;
+  font-weight: 600; padding: .6rem .9rem;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, .25);
 }
+section[data-testid="stSidebar"] .stButton > button[kind="primary"] [data-testid="stIconMaterial"] { color: #fff; }
 section[data-testid="stSidebar"] .stButton > button[kind="primary"]:hover {
-  background: var(--pine-deep);
-  border-color: var(--pine-deep);
-  color: #fff;
+  background: var(--pine-deep); border-color: var(--pine-deep); color: #fff; padding-left: .9rem;
 }
-section[data-testid="stSidebar"] [data-testid="stExpander"],
-section[data-testid="stSidebar"] [data-testid="stExpander"] details {
-  border: none !important; background: transparent !important;
+section[data-testid="stSidebar"] .stButton > button[kind="primary"] > div,
+section[data-testid="stSidebar"] .stButton > button[kind="primary"] p { justify-content: center; text-align: center; }
+
+/* FAQ / contact / tips as soft cards */
+section[data-testid="stSidebar"] [data-testid="stExpander"] {
+  border: 1px solid var(--line); border-radius: 14px;
+  background: #FBFDFD; overflow: hidden;
 }
+section[data-testid="stSidebar"] [data-testid="stExpander"] details { border: none; background: transparent; }
 section[data-testid="stSidebar"] [data-testid="stExpander"] summary {
-  font-weight: 600; color: var(--pine-deep); padding-left: 0;
+  font-weight: 600; font-size: .88rem; color: var(--pine-deep); padding: .7rem .85rem;
 }
-.side-meta { font-size: .78rem; color: var(--muted); line-height: 1.6; }
-.contact-card {
-  background: var(--pine-tint); border-radius: 12px; padding: .8rem .9rem;
-  font-size: .85rem; color: var(--ink);
+section[data-testid="stSidebar"] [data-testid="stExpander"] summary:hover { background: var(--pine-tint); }
+section[data-testid="stSidebar"] [data-testid="stExpander"] summary svg,
+section[data-testid="stSidebar"] [data-testid="stExpander"] summary [data-testid="stIconMaterial"] { color: var(--pine); }
+section[data-testid="stSidebar"] [data-testid="stExpander"] [data-testid="stExpanderDetails"] { padding: 0 .5rem .6rem; }
+
+.contact-card { font-size: .85rem; color: var(--ink); line-height: 1.5; padding: .2rem .4rem; }
+.contact-card a {
+  display: inline-block; margin-top: .4rem; background: var(--pine); color: #fff !important;
+  font-weight: 600; text-decoration: none; padding: .35rem .8rem; border-radius: 8px;
 }
-.contact-card a { color: var(--pine-deep); font-weight: 600; text-decoration: none; }
-.contact-card a:hover { text-decoration: underline; }
+.contact-card a:hover { background: var(--pine-deep); }
+.tips { list-style: none; margin: 0; padding: 0 .3rem; }
+.tips li { display: flex; gap: .6rem; padding: .45rem 0; font-size: .82rem; line-height: 1.4; color: var(--muted); }
+.tips li b { display: block; color: var(--ink); font-weight: 600; }
+.tips .n {
+  flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--pine-tint); color: var(--pine-deep); font-size: .72rem; font-weight: 700;
+}
 
 /* ---------- Page header ---------- */
 .page-head { margin-bottom: 1.25rem; }
