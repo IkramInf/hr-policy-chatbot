@@ -36,6 +36,12 @@ html, body, [class*="css"], .stApp, button, input, textarea {
 .stApp { background: var(--mist); }
 #MainMenu, footer, [data-testid="stDecoration"] { visibility: hidden; height: 0; }
 header[data-testid="stHeader"] { background: transparent; }
+/* Hide Fork / GitHub / menu / deploy buttons. The sidebar toggle stays. */
+[data-testid="stToolbarActions"],
+[data-testid="stMainMenu"],
+[data-testid="stAppDeployButton"],
+[data-testid="stStatusWidget"],
+.stAppDeployButton, .stDeployButton { display: none !important; }
 
 .block-container {
   max-width: 880px;
@@ -171,12 +177,41 @@ section[data-testid="stSidebar"] [data-testid="stExpander"] [data-testid="stExpa
 }
 
 /* ---------- Page header ---------- */
-.page-head { margin-bottom: 1.25rem; }
-.page-head h1 {
-  font-size: 1.6rem; font-weight: 700; color: var(--pine-deep);
-  margin: 0; padding: 0; letter-spacing: -.01em;
+.hero {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; gap: 1.1rem;
+  background: linear-gradient(135deg, #E6F2F0 0%, #FFFFFF 55%, #EAF0FF 100%);
+  border: 1px solid var(--line); border-radius: 22px;
+  padding: 1.3rem 1.5rem 1.3rem 1.4rem; margin-bottom: 1.25rem;
+  box-shadow: 0 6px 24px rgba(11, 79, 74, .07);
 }
-.page-head p { color: var(--muted); font-size: .95rem; margin: .25rem 0 0; }
+.hero::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 4px;
+  background: linear-gradient(90deg, #0F766E, #14B8A6, #3B82F6, #8B5CF6);
+}
+.hero-icon {
+  flex: none; width: 58px; height: 58px; border-radius: 17px;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, #0B4F4A 0%, #0F766E 50%, #2563EB 100%);
+  box-shadow: 0 8px 18px rgba(15, 118, 110, .35);
+}
+.hero h1 {
+  margin: 0; padding: 0; font-size: 1.65rem; font-weight: 800;
+  letter-spacing: -.02em; line-height: 1.15;
+  background: linear-gradient(90deg, #0B4F4A 0%, #0F766E 55%, #2563EB 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero p { color: var(--muted); font-size: .95rem; margin: .3rem 0 0; line-height: 1.45; }
+.hero-chips { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .7rem; }
+.chip {
+  font-size: .74rem; font-weight: 600; color: var(--pine-deep);
+  background: rgba(255, 255, 255, .85); border: 1px solid var(--line);
+  border-radius: 999px; padding: .2rem .65rem;
+}
+.chip.live::before {
+  content: ""; display: inline-block; width: 7px; height: 7px; margin-right: .4rem;
+  border-radius: 50%; background: #22C55E; box-shadow: 0 0 0 3px rgba(34, 197, 94, .2);
+}
 
 /* ---------- Welcome ---------- */
 .welcome {
@@ -321,18 +356,98 @@ section[data-testid="stSidebar"] .stButton > button[kind="primary"] p { justify-
 
 /* ---------- Chat input ---------- */
 [data-testid="stChatInput"] {
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: #FFFFFF;
-  box-shadow: 0 4px 20px rgba(11, 79, 74, .08);
+  border: 3px solid transparent !important;
+  border-radius: 20px;
+  background:
+    linear-gradient(#FFFFFF, #FFFFFF) padding-box,
+    linear-gradient(135deg, #0284C7, #06B6D4, #10B981, #34D399) border-box !important;
+  box-shadow: 
+    0 10px 30px -5px rgba(14, 165, 233, 0.25),
+    0 4px 15px 0px rgba(16, 185, 129, 0.18);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
+
 [data-testid="stChatInput"]:focus-within {
-  border-color: var(--pine);
-  box-shadow: 0 0 0 3px rgba(15, 118, 110, .18);
+  border: 3px solid transparent !important;
+  background:
+    linear-gradient(#FFFFFF, #FFFFFF) padding-box,
+    linear-gradient(135deg, #0284C7 0%, #06B6D4 30%, #10B981 65%, #34D399 100%) border-box !important;
+  box-shadow: 
+    0 0 0 4px rgba(6, 182, 212, 0.2),
+    0 12px 35px 0px rgba(14, 165, 233, 0.35),
+    0 0 22px 2px rgba(16, 185, 129, 0.3);
 }
-[data-testid="stChatInput"] textarea { font-size: .95rem; }
-[data-testid="stBottomBlockContainer"] { max-width: 880px; }
-[data-testid="stBottom"] > div { background: linear-gradient(to top, var(--mist) 70%, transparent); }
+
+[data-testid="stChatInput"] > div, 
+[data-testid="stChatInput"] textarea {
+  background: transparent !important; 
+  border: none !important; 
+  box-shadow: none !important;
+}
+
+[data-testid="stChatInput"] textarea { 
+  font-size: .98rem; 
+  color: #0F172A; 
+  padding-left: .35rem; 
+  font-weight: 500;
+}
+
+[data-testid="stChatInput"] textarea::placeholder { 
+  color: #64748B; 
+  font-style: italic;
+}
+
+[data-testid="stChatInputSubmitButton"] {
+  width: 38px; 
+  height: 38px; 
+  border-radius: 12px; 
+  border: none;
+  background: linear-gradient(135deg, #0284C7, #06B6D4 50%, #10B981); 
+  color: #FFFFFF;
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background 0.2s ease;
+}
+
+[data-testid="stChatInputSubmitButton"]:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.08); 
+  background: linear-gradient(135deg, #0369A1, #06B6D4 40%, #34D399);
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5), 0 0 12px rgba(52, 211, 153, 0.4);
+}
+
+[data-testid="stChatInputSubmitButton"]:active:not(:disabled) {
+  transform: translateY(0px) scale(0.96);
+}
+
+[data-testid="stChatInputSubmitButton"]:disabled {
+  background: linear-gradient(135deg, #E2E8F0, #CBD5E1); 
+  color: #94A3B8; 
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+[data-testid="stBottomBlockContainer"] { 
+  max-width: 880px; 
+}
+
+[data-testid="stBottomBlockContainer"]::after {
+  content: "Press Enter to send  ·  Press Shift + Enter for a new line  ·  Answers based on the leave policy";
+  display: block;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  background: linear-gradient(90deg, #0284C7, #06B6D4, #10B981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  padding-top: 0.65rem;
+  padding-bottom: 0.2rem;
+}
+
+[data-testid="stBottom"] > div { 
+  background: linear-gradient(to top, rgba(255, 255, 255, 0.95) 70%, rgba(255, 255, 255, 0)); 
+  backdrop-filter: blur(8px);
+}
 
 /* ---------- Accessibility ---------- */
 button:focus-visible, a:focus-visible, summary:focus-visible {
@@ -348,11 +463,16 @@ button:focus-visible, a:focus-visible, summary:focus-visible {
 @media (max-width: 640px) {
   .block-container, [data-testid="stMainBlockContainer"] { padding: 3.25rem .9rem 5.5rem; }
   .welcome { padding: 1.25rem 1.1rem; border-radius: 16px; }
-  .page-head { margin: 1.4rem 0 .75rem; }
-  .page-head h1 { font-size: 1.3rem; }
-  .page-head p { display: none; }
+  .hero { margin: 1.4rem 0 .75rem; padding: .95rem 1rem; gap: .8rem; border-radius: 18px; }
+  .hero-icon { width: 44px; height: 44px; border-radius: 13px; }
+  .hero-icon svg { width: 22px; height: 22px; }
+  .hero h1 { font-size: 1.25rem; }
+  .hero p, .hero-chips { display: none; }
+  [data-testid="stBottomBlockContainer"]::after { content: "Answers come only from the leave policy"; }
   .welcome h2 { font-size: 1.15rem; }
-  .welcome p { font-size: .88rem; }
+  .welcome p { display: none; }
+  .welcome { padding: 1rem 1.1rem; }
+  .starter-label { margin: 0; }
   [data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"])
     [data-testid="stChatMessageContent"] { max-width: 92%; }
 }

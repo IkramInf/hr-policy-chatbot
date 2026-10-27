@@ -7,6 +7,25 @@ from frontend.components.sidebar import HR_EMAIL, SUGGESTED_QUESTIONS
 
 ASSISTANT_AVATAR = ":material/support_agent:"
 
+_HERO_HTML = (
+    '<div class="hero">'
+    '<div class="hero-icon">'
+    '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#fff" '
+    'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" '
+    'aria-hidden="true">'
+    '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/>'
+    '<path d="m8.5 12 2.4 2.4 4.6-4.8"/></svg></div>'
+    "<div>"
+    "<h1>HR Policy Assistant</h1>"
+    "<p>Instant answers to your company's policy questions, "
+    "with source references.</p>"
+    '<div class="hero-chips">'
+    '<span class="chip live">Ready to help</span>'
+    '<span class="chip">Source references</span>'
+    '<span class="chip">Private data protected</span>'
+    "</div></div></div>"
+)
+
 NOT_FOUND_PREFIX = "i don't know"
 STARTER_COUNT = 4
 
@@ -195,14 +214,7 @@ def render_chat_view(pending_question: str | None = None) -> None:
     If pending_question is given, it is shown immediately with a typing
     indicator while the parent app waits for the backend.
     """
-    st.markdown(
-        '<div class="page-head">'
-        "<h1>Your HR Policy Assistant</h1>"
-        "<p>Ask about your company's leave policy and get answers with "
-        "references to the relevant sections.</p>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
+    st.markdown(_HERO_HTML, unsafe_allow_html=True)
 
     messages = st.session_state.setdefault("messages", [])
 

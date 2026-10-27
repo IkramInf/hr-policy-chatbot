@@ -6,8 +6,8 @@ import streamlit as st
 from frontend.utils.date_utils import get_formatted_date
 
 
-POLICY_VERSION = "2.0"
-HR_EMAIL = "hr@xyz-company.example"  # Replace with the real HR email.
+POLICY_VERSION = "1.0"
+HR_EMAIL = "hr@xyz.com"
 
 SUGGESTED_QUESTIONS = [
     "How do I apply for annual leave?",
@@ -35,7 +35,7 @@ def render_sidebar() -> str | None:
         st.markdown(
             '<div class="brand"><div class="brand-mark">💬</div><div>'
             '<div class="brand-name">HR Policy Assistant</div>'
-            '<div class="brand-tag">Clear answers from your leave policy</div>'
+            '<div class="brand-subtitle">Ask questions about HR policies</div>'
             "</div></div>",
             unsafe_allow_html=True,
         )
@@ -52,7 +52,7 @@ def render_sidebar() -> str | None:
             st.rerun()
 
         with st.expander(
-            "Common questions",
+            "Frequently Asked Questions",
             expanded=True,
             icon=":material/help:",
         ):
@@ -65,7 +65,7 @@ def render_sidebar() -> str | None:
                 ):
                     selected_question = question
 
-        with st.expander("Tips for better answers", icon=":material/lightbulb:"):
+        with st.expander("Chat Tips", icon=":material/lightbulb:"):
             tips = [
                 ("Ask one thing at a time", "Short, specific questions work best."),
                 ("Name the leave type", "For example annual, sick or casual leave."),
@@ -97,7 +97,6 @@ def render_sidebar() -> str | None:
             '<div class="row">'
             f'<span class="pill">Policy v{html.escape(POLICY_VERSION)}</span>'
             f"<span>{html.escape(get_formatted_date())}</span></div>"
-            '<div class="note">Answers are based on the indexed policy document.</div>'
             "</div>",
             unsafe_allow_html=True,
         )

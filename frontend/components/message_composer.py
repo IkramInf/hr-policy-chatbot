@@ -5,7 +5,7 @@ import streamlit as st
 def render_message_composer() -> str | None:
     """Render the chat input and return a submitted question."""
     question = st.chat_input(
-        "Ask about leave, approvals, certificates, carry-forward…",
+        "Ask a policy question…",
         max_chars=2000,
         key="chat_input",
     )
