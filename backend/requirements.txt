@@ -9,7 +9,6 @@ pdfplumber
 qdrant-client
 langchain-core
 langchain-qdrant
-langchain-huggingface
 langchain-groq
 langchain-text-splitters
-sentence-transformers
+fastembed

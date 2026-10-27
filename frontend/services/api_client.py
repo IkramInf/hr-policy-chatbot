@@ -6,7 +6,8 @@ import requests
 
 
 DEFAULT_API_URL = "http://127.0.0.1:8000/api"
-REQUEST_TIMEOUT_SECONDS = 35
+# Generous: a free-tier backend can take ~1 minute to wake from sleep.
+REQUEST_TIMEOUT_SECONDS = 90
 
 
 class APIClientError(Exception):

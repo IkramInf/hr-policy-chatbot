@@ -22,8 +22,9 @@ def get_qdrant_client() -> QdrantClient:
     )
 
 
+@lru_cache(maxsize=1)
 def get_vector_store() -> QdrantVectorStore:
-    """Return a vector store connected to the configured collection."""
+    """Return the (cached) vector store for the configured collection."""
     settings = get_settings()
     client = get_qdrant_client()
 
@@ -122,3 +123,5 @@ def close_qdrant_client() -> None:
     if get_qdrant_client.cache_info().currsize:
         get_qdrant_client().close()
         get_qdrant_client.cache_clear()
+
+    get_vector_store.cache_clear()

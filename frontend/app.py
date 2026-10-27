@@ -1,4 +1,5 @@
 
+import threading
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -9,6 +10,7 @@ from frontend.components.chat_view import render_chat_view
 from frontend.components.message_composer import render_message_composer
 from frontend.services.api_client import (
     APIClientError,
+    check_backend_health,
     send_chat_message,
 )
 from frontend.styles import inject_styles
@@ -23,10 +25,22 @@ st.set_page_config(
 )
 
 
+def _wake_backend() -> None:
+    try:
+        check_backend_health()
+    except Exception:
+        pass  # Only a wake-up call; real errors surface on the chat request.
+
+
 def initialize_session() -> None:
     """Initialize the state needed for a conversation."""
     st.session_state.setdefault("messages", [])
     st.session_state.setdefault("pending_question", None)
+
+    # Wake a sleeping backend (e.g. Render free tier) while the user types.
+    if not st.session_state.get("backend_pinged"):
+        st.session_state.backend_pinged = True
+        threading.Thread(target=_wake_backend, daemon=True).start()
 
 
 def _now_label() -> str:
@@ -65,8 +79,8 @@ def process_question(question: str) -> None:
         st.session_state.messages.append(
             {
                 "role": "assistant",
-                "content": f"{exc} Please try again. If the problem "
-                "continues, contact HR.",
+                "content": f"{exc} If the problem continues, "
+                "contact HR.",
                 "sources": [],
                 "blocked": False,
                 "error": True,
